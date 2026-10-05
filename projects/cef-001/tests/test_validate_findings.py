@@ -52,6 +52,11 @@ class ValidateFindingsTests(unittest.TestCase):
     def test_non_synthetic_records_are_rejected_during_startup(self):
         self.assertIn("synthetic must be true during the startup phase", validate({"synthetic": False, "status": "discovered", "observation": "x"}))
 
+    def test_non_string_status_is_rejected_cleanly(self):
+        for status in ([], {}, None, 1):
+            with self.subTest(status=status):
+                self.assertTrue(any("status must be one of" in error for error in validate({"synthetic": True, "status": status})))
+
 
 if __name__ == "__main__":
     unittest.main()

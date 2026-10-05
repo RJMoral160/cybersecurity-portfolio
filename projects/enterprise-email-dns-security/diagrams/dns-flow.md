@@ -6,7 +6,9 @@
 flowchart LR
   Client["Internal client"] -->|"corp.example.test query<br/>UDP/TCP 53"| MS["Microsoft DNS<br/>172.24.25.10<br/>inner zone"]
   MS -->|"example.org conditional forward<br/>E-DNS-01"| B1["BIND primary<br/>198.51.100.10<br/>outer zone"]
-  B1 -->|"AXFR/IXFR TCP 53<br/>E-DNS-02"| B2["BIND secondary<br/>198.51.100.11"]
+  B1 -.->|"NOTIFY UDP 53<br/>new serial"| B2["BIND secondary<br/>198.51.100.11"]
+  B2 -->|"initiate AXFR/IXFR<br/>TCP 53 E-DNS-02"| B1
+  B1 -->|"zone data on same<br/>TCP connection"| B2
   Ext["External resolver"] -->|"MX/A/TXT query<br/>UDP/TCP 53"| B1
 ```
 

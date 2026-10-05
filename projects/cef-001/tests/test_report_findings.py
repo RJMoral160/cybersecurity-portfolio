@@ -28,9 +28,16 @@ class ReportFindingsTests(unittest.TestCase):
 
     def test_report_is_sorted_and_escapes_table_delimiters(self):
         report = render_markdown([discovered("Z|2"), discovered("A|1")], "synthetic.json")
-        self.assertLess(report.index("A\\|1"), report.index("Z\\|2"))
+        self.assertLess(report.index("A&#124;1"), report.index("Z&#124;2"))
         self.assertIn("- **discovered:** 2", report)
         self.assertIn("- **retested:** 0", report)
+
+    def test_supplied_markdown_does_not_create_structure(self):
+        report = render_markdown([discovered("[link](https://example.invalid)|<b>\n# heading")], "data.json")
+        self.assertIn("&#91;link&#93;", report)
+        self.assertIn("&#124;", report)
+        self.assertIn("&lt;b&gt;", report)
+        self.assertNotIn("\n# heading", report)
 
     def test_load_collection_rejects_object_instead_of_array(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -1,6 +1,6 @@
 # Synthetic Finding Evidence Report
 
-- **Source:** `finding_collection.json`
+- **Source:** finding&#95;collection.json
 - **Records:** 5
 - **Scope:** Offline synthetic-data validation only.
 - **Limitation:** A structural pass does not confirm a live vulnerability, remediation, or retest outcome.

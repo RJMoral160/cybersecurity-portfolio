@@ -1,6 +1,6 @@
 # Denied management and FTP data paths
 
-`reconstructed-from-project-records` for blocked SSH; `reference-implementation` for a proposed passive FTP range.
+`reconstructed-from-project-records` for blocked **DMZ server** SSH; `reference-implementation` for bounded management and owner-supplied passive ranges.
 
 ## Denied SSH
 
@@ -11,16 +11,20 @@ flowchart LR
   VY --> L["Drop log entry"]
 ```
 
-The recorded test first showed a failed SSH connection without a log. Enabling `default-log` produced the drop record. A failed connection without that record would not, by itself, identify the blocking device.
+The recorded test first showed a failed SSH connection without a log. Enabling `default-log` produced the drop record. That test does **not** test router-local management. The VyOS reference separately restricts IPv4 input SSH to `192.168.2.20` on `eth0` and drops other router-local traffic. IPv6 input/forward default-drop is an explicit reference boundary, not historical test evidence.
 
 ## FTP control and passive data
 
 ```mermaid
 flowchart LR
-  C["FTP client"] -->|"TCP 21 control<br/>recorded allowance"| F["Firewall + NAT"]
+  C["FTP client"] -->|"TCP 21 control"| F["Firewall / optional NAT"]
   F -->|"TCP 21"| S["vsftpd DMZ host"]
-  S -.->|"passive range proposal<br/>TCP 30000–30049"| F
-  F -.->|"data connection to chosen port"| C
+  S -.->|"PASV reply: selected port<br/>server listens"| F
+  F -.->|"control reply via state"| C
+  C -->|"NEW TCP data connection<br/>VIP:50000-50100 or routed DMZ:30000-30100"| F
+  F -->|"explicit passive permit<br/>and NAT where needed"| S
+  S -->|"download bytes / upload ACKs<br/>same TCP state"| F
+  F -->|"return data through state"| C
 ```
 
-The passive range is a proposed new-lab configuration in [vsftpd.conf](../configs/vsftpd.conf). The source report documents FTP service access but not this range or a complete passive transfer. Test a directory listing and file download while inspecting both firewall state and server logs.
+The two ranges are reference settings in [pfSense vsftpd](../configs/vsftpd-pfsense.conf) and [VyOS vsftpd](../configs/vsftpd.conf). The report documents FTP service access but does not preserve those ranges or a complete passive transfer trace. Test listing, download, and read-only upload denial while inspecting firewall state and server logs.

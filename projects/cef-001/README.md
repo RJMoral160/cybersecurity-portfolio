@@ -24,7 +24,7 @@ data/synthetic/*profile.json + *observation.json
   → examples/sample_advisory_assessment.md
 ```
 
-The modules use only the Python standard library. [Dependencies](DEPENDENCIES.md) records the runtime requirement.
+The modules use only the Python standard library. [Dependencies](DEPENDENCIES.md) records the runtime requirement. The validator checks fields in supplied records; it cannot prove that the stated lifecycle transitions occurred or that remediation worked.
 
 ## Implemented Components
 
@@ -53,7 +53,7 @@ python3 src/report_findings.py data/synthetic/finding_collection.json --output /
 python3 src/advisory_assessment.py data/synthetic/apache_cve_2021_41773_profile.json data/synthetic/apache_cve_2021_41773_observation.json --output /tmp/cef001-advisory.md
 ```
 
-The current suite contains 22 tests. See [validation details](validation/README.md) and compare local output with the [sample collection report](examples/sample_report.md) and [sample advisory report](examples/sample_advisory_assessment.md).
+The offline suite includes unit, CLI failure-path, and deterministic sample comparisons. See [validation details](validation/README.md) and compare local output with the [sample collection report](examples/sample_report.md) and [sample advisory report](examples/sample_advisory_assessment.md).
 
 ## Troubleshooting
 
@@ -61,7 +61,7 @@ If a collection is rejected, the command prints all structural errors with recor
 
 ## Reproduction Guide
 
-1. Clone the repository and enter `projects/cef-001`; Python 3.9+ is the only runtime dependency.
+1. Clone the repository and enter `projects/cef-001`; Python 3.9+ is the only runtime dependency. The minimum was tested locally on Python 3.9.6; CI also tests on Python 3.11.
 2. Run the unit-test command above in a clean directory. It needs no network or credentials.
 3. Run the collection and advisory commands. Open the two generated `/tmp` reports and compare status/count/conclusion with the included samples.
 4. Copy a fixture to a local scratch path, remove one required condition, and rerun the advisory command. The expected result is `insufficient_evidence`.
@@ -69,11 +69,13 @@ If a collection is rejected, the command prints all structural errors with recor
 
 ## Project Completion
 
-The local validator, reporter, advisory comparator, synthetic fixtures, generated samples, and 22 unit tests are implemented. The tests cover the stated local behavior. The project remains active: no live target is scanned, no real remediation is performed, and no actual post-change retest is recorded. A later authorized workflow would need independent advisory review, vendor-specific version handling, and comparable pre/post system observations.
+The local validator, reporter, advisory comparator, synthetic fixtures, generated samples, and offline tests are implemented. The tests cover the stated local behavior. The project remains active: no live target is scanned, no real remediation is performed, and no actual post-change retest is recorded. A later authorized workflow would need independent advisory review, vendor-specific version handling, and comparable pre/post system observations.
 
 ## Limitations
 
 Exact-version matching is narrow by design. A syntactically valid record cannot establish that an observed product is truly present or vulnerable. The `applicable_in_synthetic_model` result describes only the supplied fixture and profile. The sample reports are `synthetic-example` artifacts.
+
+The Apache fixture is historical advisory context, not a patch-level recommendation. Apache states that its 2.4.50 fix for CVE-2021-41773 was incomplete and describes the related CVE-2021-42013; a new deployment should use a currently supported version after consulting [Apache's security advisories](https://httpd.apache.org/security/vulnerabilities_24.html), not install 2.4.51 merely because it appears in a synthetic profile.
 
 ## Repository Contents
 

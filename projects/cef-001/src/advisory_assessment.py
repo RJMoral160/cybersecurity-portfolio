@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import html
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 
 PROFILE_FIELDS = (
@@ -23,7 +25,7 @@ def load_object(path: Path, label: str) -> dict[str, Any]:
     try:
         with path.open(encoding="utf-8") as handle:
             value = json.load(handle)
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise ValueError("could not read {}: {}".format(label, exc)) from exc
     if not isinstance(value, dict):
         raise ValueError("{} must be a JSON object".format(label))
@@ -35,11 +37,28 @@ def validate_profile(profile: dict[str, Any]) -> list[str]:
     for field in PROFILE_FIELDS:
         if field not in profile:
             errors.append("profile requires {}".format(field))
-    if not isinstance(profile.get("affected_versions"), list) or not profile.get("affected_versions"):
-        errors.append("profile affected_versions must be a non-empty array")
-    if not isinstance(profile.get("required_conditions"), dict):
+    for field in ("cve", "vendor", "product", "fixed_version"):
+        if field in profile and (not isinstance(profile[field], str) or not profile[field].strip()):
+            errors.append("profile {} must be non-empty text".format(field))
+    versions = profile.get("affected_versions")
+    if not isinstance(versions, list) or not versions or any(not isinstance(v, str) or not v.strip() for v in versions):
+        errors.append("profile affected_versions must be a non-empty array of non-empty strings")
+    conditions = profile.get("required_conditions")
+    if not isinstance(conditions, dict):
         errors.append("profile required_conditions must be an object")
-    if not isinstance(profile.get("source_url"), str) or not profile.get("source_url", "").startswith("https://"):
+    elif not conditions:
+        errors.append("profile required_conditions must not be empty; use a separately reviewed no-prerequisite profile")
+    elif any(not isinstance(k, str) or not k.strip() or type(v) is not bool for k, v in conditions.items()):
+        errors.append("profile required_conditions must map non-empty names to booleans")
+    source = profile.get("source_url")
+    try:
+        parsed = urlparse(source) if isinstance(source, str) else None
+        valid_url = bool(parsed and parsed.scheme == "https" and parsed.hostname and "." in parsed.hostname and parsed.path not in ("", "/") and not parsed.username and not parsed.password and not any(character.isspace() for character in source))
+        if parsed:
+            _ = parsed.port  # Invalid port syntax raises ValueError.
+    except ValueError:
+        valid_url = False
+    if not valid_url:
         errors.append("profile source_url must be an HTTPS URL")
     return errors
 
@@ -59,12 +78,16 @@ def assess(profile: dict[str, Any], observation: dict[str, Any]) -> dict[str, An
     if observation.get("synthetic") is not True:
         result["reasons"].append("observation is not labeled synthetic")
         return result
-    if observation.get("product") != profile.get("product"):
+    product = observation.get("product")
+    if not isinstance(product, str) or not product.strip():
+        result["reasons"].append("observed product identity is missing or invalid")
+        return result
+    if product != profile.get("product"):
         result["conclusion"] = "not_applicable"
         result["reasons"].append("observed product does not match advisory profile")
         return result
     version = observation.get("version")
-    if not isinstance(version, str) or not version:
+    if not isinstance(version, str) or not version.strip():
         result["reasons"].append("observed version is missing")
         return result
     if version not in profile.get("affected_versions", []):
@@ -78,6 +101,8 @@ def assess(profile: dict[str, Any], observation: dict[str, Any]) -> dict[str, An
     mismatches = []
     for name, expected in profile.get("required_conditions", {}).items():
         if name not in conditions:
+            result["missing_conditions"].append(name)
+        elif type(conditions[name]) is not bool:
             result["missing_conditions"].append(name)
         elif conditions[name] != expected:
             mismatches.append(name)
@@ -95,24 +120,30 @@ def assess(profile: dict[str, Any], observation: dict[str, Any]) -> dict[str, An
 
 
 def render_markdown(profile: dict[str, Any], result: dict[str, Any]) -> str:
+    def safe(value: object) -> str:
+        return html.escape(str(value), quote=True).replace("\\", "&#92;").replace("`", "&#96;").replace("*", "&#42;").replace("[", "&#91;").replace("]", "&#93;").replace("\n", " ").replace("\r", " ")
+
     reasons = result["reasons"] or ["No additional reason recorded."]
     lines = [
         "# Synthetic Advisory Assessment",
         "",
-        "- **CVE:** `{}`".format(result["cve"]),
-        "- **Product:** {}".format(profile["product"]),
-        "- **Authoritative advisory:** {}".format(profile["source_url"]),
-        "- **Conclusion:** `{}`".format(result["conclusion"]),
+        "- **CVE:** {}".format(safe(result["cve"])),
+        "- **Product:** {}".format(safe(profile["product"])),
+        "- **Authoritative advisory:** {}".format(safe(profile["source_url"])),
+        "- **Conclusion:** {}".format(safe(result["conclusion"])),
         "",
         "## Reasons",
         "",
     ]
-    lines.extend("- {}".format(reason) for reason in reasons)
+    lines.extend("- {}".format(safe(reason)) for reason in reasons)
     if result["missing_conditions"]:
         lines.extend(["", "## Missing evidence", ""])
-        lines.extend("- {}".format(item) for item in result["missing_conditions"])
+        lines.extend("- {}".format(safe(item)) for item in result["missing_conditions"])
+    if result.get("mismatched_conditions"):
+        lines.extend(["", "## Mismatched conditions", ""])
+        lines.extend("- {}".format(safe(item)) for item in result["mismatched_conditions"])
     lines.extend(["", "## Limitations", ""])
-    lines.extend("- {}".format(item) for item in result["limitations"])
+    lines.extend("- {}".format(safe(item)) for item in result["limitations"])
     return "\n".join(lines) + "\n"
 
 
@@ -134,8 +165,11 @@ def main() -> int:
         return 1
     report = render_markdown(profile, assess(profile, observation))
     if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(report, encoding="utf-8")
+        try:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(report, encoding="utf-8")
+        except OSError as exc:
+            parser.error("could not write report: {}".format(exc))
         print("WROTE: {}".format(args.output))
     else:
         print(report)

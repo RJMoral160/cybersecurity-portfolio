@@ -16,4 +16,7 @@ smtp_tls_security_level = may
 smtpd_milters = inet:127.0.0.1:8891, inet:127.0.0.1:8893
 non_smtpd_milters = inet:127.0.0.1:8891, inet:127.0.0.1:8893
 milter_default_action = accept
+# Fail-open: if a milter is unavailable, Postfix accepts mail without that
+# filter/signature. For fail-closed behavior set this to tempfail only after
+# testing monitoring and recovery; a failed milter would then defer mail.
 milter_protocol = 6

@@ -46,12 +46,12 @@ The [troubleshooting record](troubleshooting/README.md) covers a wrong Exchange 
 
 ## Reproduction Guide
 
-1. Use isolated VMs for two BIND servers, two Windows domain controllers/DNS servers, one Exchange server, one Postfix/SpamAssassin/OpenDKIM relay, a firewall with outer and inner DMZs, and a client. Add Relianoid/OWA and Tinyproxy only after core mail works.
+1. Use isolated VMs for BIND 9.20.2 primary/secondary and a separate validating resolver, Windows DNS/AD, a supported Exchange Server build, one Linux Postfix/SpamAssassin/OpenDKIM relay, a firewall with outer and inner DMZs, and a client. Record exact package releases. Add Relianoid ADC (the report used 7.7.0), OWA, and Tinyproxy only after core mail works.
 2. Assign the example addresses in the [configuration files](configs/) to isolated test interfaces; RFC 5737 addresses are illustrative and cannot serve as Internet-facing deployment addresses. Create the internal namespace independently from the external example zone.
 3. Load forward/reverse zones and test syntax, serial change, and transfer. Configure Microsoft DNS forwarding and verify both names before installing mail applications.
 4. Configure Postfix transport, relay restrictions, and Exchange connectors. Test local mailbox access, then one controlled message per hop with logs and queue IDs. Add SpamAssassin and repeat with a benign message and a GTUBE test through Postfix.
 5. Generate new DKIM and DNSSEC keys locally. Publish only public DNS material, test signing and validation, then add a DMARC monitoring record. Configure HTTPS/OWA publication after DNS, listener, firewall, and certificate checks pass separately.
-6. Before major changes, copy known-good zone and service configurations into a private snapshot. For rollback, restore the prior zone serial/config and reload, or disable the new listener/connector while preserving mail logs for diagnosis.
+6. Before major changes, copy known-good zone and service configurations into a private snapshot. For DNS rollback, restore prior **content** with a newly advanced SOA serial, reload, allow inline re-signing and secondary transfer, then recheck validating-resolver results; never restore an older serial unchanged. For a failed connector/listener, disable only the new setting while preserving mail logs for diagnosis.
 
 ## Project Completion
 

@@ -55,6 +55,28 @@ class AdvisoryAssessmentTests(unittest.TestCase):
         self.assertIn("does not replace human review", report)
         self.assertIn("applicable_in_synthetic_model", report)
 
+    def test_missing_and_invalid_product_preserve_uncertainty(self):
+        for product in (None, "", [], {}):
+            with self.subTest(product=product):
+                self.assertEqual("insufficient_evidence", assess(PROFILE, observation(product=product))["conclusion"])
+
+    def test_boolean_condition_does_not_accept_integer(self):
+        result = assess(PROFILE, observation(conditions={"feature_enabled": 1, "access_control_present": False}))
+        self.assertEqual("insufficient_evidence", result["conclusion"])
+        self.assertIn("feature_enabled", result["missing_conditions"])
+
+    def test_mismatched_condition_rendered(self):
+        result = assess(PROFILE, observation(conditions={"feature_enabled": False, "access_control_present": False}))
+        self.assertIn("feature_enabled", render_markdown(PROFILE, result))
+
+    def test_invalid_profile_entries(self):
+        bad = dict(PROFILE, affected_versions=[""], required_conditions={"flag": 1}, source_url="https://")
+        errors = validate_profile(bad)
+        self.assertTrue(any("affected_versions" in error for error in errors))
+        self.assertTrue(any("required_conditions" in error for error in errors))
+        self.assertTrue(any("source_url" in error for error in errors))
+        self.assertTrue(any("source_url" in error for error in validate_profile(dict(PROFILE, source_url="https://["))))
+
 
 if __name__ == "__main__":
     unittest.main()

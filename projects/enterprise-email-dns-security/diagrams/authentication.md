@@ -14,8 +14,9 @@ flowchart LR
 ```mermaid
 flowchart LR
   External["External test message<br/>benign or GTUBE"] -->|"TCP 25"| Postfix["Postfix relay"]
-  Postfix -->|"milter/filter path"| SA["SpamAssassin"]
-  SA -->|"tag or normal delivery"| Exchange["Exchange mailbox"]
+  Postfix -->|"milter request<br/>loopback 8893"| SA["spamass-milter<br/>SpamAssassin spamd"]
+  SA -->|"filter verdict/header<br/>returns to Postfix"| Postfix
+  Postfix -->|"accepted/marked message<br/>TCP 25"| Exchange["Exchange mailbox"]
   Internal["Internal-to-internal mail"] -->|"stays inside Exchange"| Exchange
 ```
 

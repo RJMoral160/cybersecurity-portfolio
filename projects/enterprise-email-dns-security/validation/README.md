@@ -15,7 +15,8 @@
 | Filter | `systemctl status spamassassin spamass-milter`; controlled external-source GTUBE and benign message | GTUBE tagged on Postfix path; benign message not tagged | Message bypassed relay, milter disabled, log mismatch |
 | SPF/DMARC | `dig @198.51.100.10 example.org TXT`; `dig @198.51.100.10 _dmarc.example.org TXT` | Published values match intended policy | Stale zone or wrong owner name |
 | DKIM | `opendkim-testkey -d example.org -s default -vvv`; inspect receiver header | Public selector available; signed test message verified by receiver | Key mismatch, milter/socket, header alteration |
-| DNSSEC | `dig @198.51.100.10 example.org DNSKEY +dnssec`; then query a validating resolver | RRSIG/DNSKEY present, validated chain succeeds where delegation exists | Unsigned update, DS mismatch, stale keys |
-| OWA | `curl -vk https://owa.example.org/owa/` from inside and isolated outside clients | TLS listener and upstream Exchange response | DNS, VIP/NAT, firewall 443, ADC farm, certificate |
+| DNSSEC | `dig @198.51.100.10 example.org DNSKEY +dnssec`; then `dig @127.0.0.1 mail.example.org A +dnssec` on the isolated validating resolver | Authoritative RRSIG/DNSKEY; resolver AD only after local DS trust/delegation from [workflow](../configs/DNSSEC.md) | Unsigned update, DS mismatch, stale keys |
+| OWA route diagnosis | `curl -vk --resolve owa.example.org:443:198.51.100.13 https://owa.example.org/owa/` on isolated client | HTTP response can localize WAN/ADC/backend fault; **not** TLS success | VIP/DNAT, E-WEB-01/02, ADC health |
+| OWA TLS success | `curl --fail --cacert /path/to/local-ca.crt --resolve owa.example.org:443:198.51.100.13 https://owa.example.org/owa/` | Valid CA chain, hostname and backend response | Certificate name/chain, TLS listener, route |
 
 Record both successful and failed paths. For external mail, preserve a message ID and timestamps at the sender, Postfix, Exchange, and recipient. GTUBE must traverse Postfix to test the deployed SpamAssassin path. Use a benign message as a negative control. Do not move DMARC to quarantine/reject based only on a DNS TXT query.

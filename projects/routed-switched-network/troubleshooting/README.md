@@ -17,15 +17,15 @@
 
 ## Triangle switching loop
 
-1. **Symptom:** An incorrectly configured link produced a broadcast loop after MSTP was added.
+1. **Symptom:** The recorded three-switch triangle experienced a broadcast storm during the MSTP change.
 2. **Expected:** Each instance has a discarding path in the three-switch triangle.
-3. **Initial hypothesis:** Incorrect port role/priority on the inter-switch link.
+3. **Initial hypothesis:** The path that should have been discarding was forwarding; region mapping, cabling, port role, and priority were candidates.
 4. **Checks:** `show spanning-tree mst`, interface state and counters on the affected link.
-5. **Evidence:** The report says port-state inspection located the bad link.
-6. **Root cause:** Port priority/blocking behavior on the link was wrong; exact pre-change port values are not preserved in this public record.
-7. **Change:** Correct port priority/blocking state; keep the link disconnected while changing it if a storm is active.
+5. **Evidence:** The report describes a storm and a corrective spanning-tree port-priority change. It does not preserve the pre-change bridge IDs, port-role output, or a packet capture.
+6. **Root cause:** Unconfirmed. Priority influences path selection, but the record does not prove that priority alone created the loop; a region mismatch, transitional state, or link configuration could also explain it.
+7. **Change:** The recorded work changed port priority. In a new lab, isolate a storming link first, then check MST region digest and roles before any priority adjustment.
 8. **Retest:** Reconnect under observation and verify a discarding port and stable counters.
-9. **Final result:** The report records the storm ending after the port correction.
+9. **Final result:** The report says the storm ended after the spanning-tree adjustment; that sequence does not isolate its causal mechanism.
 10. **Lesson:** Verify MSTP region consistency and blocked paths before closing a physical loop.
 
 ## Missing OSPF coverage

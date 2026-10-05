@@ -24,8 +24,10 @@ The network project supplies VLAN, routing, and edge-policy examples. The email/
 
 ## Project Status
 
-The network, email/DNS, and firewall implementations were completed in controlled team laboratories and are reconstructed here from project records. The public configuration sets are edited excerpts or reference implementations as labeled in [Artifact Guide](ARTIFACT_GUIDE.md). The Python pipeline runs locally with synthetic inputs and remains active. No additional project is planned in this repository at present.
+The network records include tested VLAN/MSTP and later routing/NAT work; the public phase configs have not been rebuilt on the original devices. Email/DNS records include internal mail and service integration, but a complete external-delivery trace and validating-resolver result are not preserved. Firewall records include segmentation and selected service/deny tests; the added passive-FTP and management policies are untested reference settings. CEF-001 runs offline with synthetic data and remains active. Artifact labels are defined in the [Artifact Guide](ARTIFACT_GUIDE.md).
 
 ## Repository Structure
 
 `projects/<name>/configs/` holds device and service settings; `diagrams/` holds traffic and architecture views; `validation/` holds checks and expected behavior; `troubleshooting/` records faults and corrections. The Python project also has `src/`, `tests/`, `data/`, and `examples/`. [PROJECT_INDEX.md](PROJECT_INDEX.md) links technologies to specific files and tests. [REPOSITORY_NOTES.md](REPOSITORY_NOTES.md) explains the committed ignore rules.
+
+Run `python3 tools/check_repo.py` for offline links, JSON, address, secret-pattern, and diagram-fence checks. `python3 -m unittest discover -s projects/cef-001/tests -v` runs the Python tests. Diagram **rendering** requires Mermaid CLI and is a separate CI step; static checks do not substitute for it.

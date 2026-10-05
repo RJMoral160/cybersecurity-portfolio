@@ -19,17 +19,16 @@ The [port and subnet plan](configs/PORT_AND_SUBNET_PLAN.md) separates the MSTP a
 
 | Component | Role | File |
 |---|---|---|
-| Cisco switches 1 and 2 | VLANs, trunks, MSTP instances and preferred roots | [switch 1](configs/cisco-switch-1.cfg), [switch 2](configs/cisco-switch-2.cfg) |
-| Aruba switch | Tagged uplinks, untagged client ports, MSTP mapping | [Aruba config](configs/aruba-switch.cfg) |
-| Cisco router 1 | VLAN gateways, OSPF/default route, NAT overload, web/TFTP ACL excerpts | [router 1 config](configs/cisco-router-1.cfg) |
-| Cisco router 2 | Additional VLAN gateways and OSPF advertisements | [router 2 config](configs/cisco-router-2.cfg) |
-| VyOS router | Wireless/client `/25`, OSPF, DHCP | [VyOS config](configs/vyos-router.conf) |
+| MSTP/static phase | Triangle switching, VLANs, and static routes | [Cisco 1](configs/mstp-cisco-switch-1.cfg), [Cisco 2](configs/mstp-cisco-switch-2.cfg), [Aruba](configs/mstp-aruba-switch.cfg), [router 1](configs/mstp-static-router-1.cfg), [router 2](configs/mstp-static-router-2.cfg) |
+| OSPF phase switches | Tagged router trunks and untagged VyOS transit | [Cisco switch](configs/ospf-cisco-switch-1.cfg), [Aruba switch](configs/ospf-aruba-switch-2.cfg) |
+| OSPF phase routers | Gateways, OSPF, NAT, DHCP, and historical ACLs | [router 1](configs/ospf-cisco-router-1.cfg), [router 2](configs/ospf-cisco-router-2.cfg), [DHCP 1](configs/ospf-dhcp-router-1.cfg), [DHCP 2](configs/ospf-dhcp-router-2.cfg), [VyOS](configs/ospf-vyos-router.conf) |
+| Reference tightening | Narrower TFTP ACL, offline lab resolver, wired VyOS option | [ACL](configs/ospf-acl-reference.cfg), [DNS resolver](configs/lab-dnsmasq.conf), [wired VyOS](configs/ospf-vyos-wired-reference.conf) |
 
 ## Configuration
 
 VLAN creation precedes port assignment. Trunk allowed lists carry only the expected VLANs. The MSTP region name, revision, and VLAN-to-instance mapping must match on all three switches; a mismatch creates a boundary and can change port selection. Router subinterfaces provide the Layer 3 gateway for tagged traffic. Router 1 marks the WAN as NAT outside and the routed LAN as NAT inside, then overloads selected source networks on the WAN interface.
 
-The published IOS ACL excerpt retains a recorded TFTP wildcard of `0.0.0.255`, which is broader than the wireless `/25`; the comment identifies the tighter value. This is a useful review point when adapting the configuration. The original reports also have minor inconsistencies between phase diagrams and configuration exports; use the phase-specific table rather than merging every command into one device config.
+The [historical IOS ACL excerpt](configs/ospf-cisco-router-1.cfg) retains a recorded TFTP wildcard of `0.0.0.255`, which is broader than the wireless `/25`; it is **not** a hardened template. A separate [reference policy](configs/ospf-acl-reference.cfg) uses `0.0.0.127` and a specific destination for a new lab. The original reports also have minor inconsistencies between phase diagrams and configuration exports; use the phase-specific table rather than merging every command into one device config.
 
 ## Traffic or Data Flow
 
@@ -45,10 +44,10 @@ The [troubleshooting record](troubleshooting/README.md) traces the wrong instanc
 
 ## Reproduction Guide
 
-1. Use two IOS-capable routers, two IOS-capable switches, one ArubaOS-S equivalent, one VyOS VM/router, and test clients in an isolated lab. A virtual switch implementation can replace physical hardware if it supports MSTP and 802.1Q.
+1. Use isolated IOS-capable routers (the records include a Cisco 1921), Cisco switches, an ArubaOS-S switch, a VyOS router, a DNS VM, and clients. The original IOS releases are not preserved; run `show version` and adapt interface syntax. An emulator must implement MSTP and 802.1Q before it can replace physical switching. The VyOS Wi-Fi phase requires compatible radio hardware; a wired VM substitute is described in [the plan](configs/PORT_AND_SUBNET_PLAN.md).
 2. Assign interfaces using [the plan](configs/PORT_AND_SUBNET_PLAN.md). Replace the example external network with an isolated lab uplink; do not send RFC 5737 traffic to the Internet. Record actual port-to-port cables before pasting a config.
 3. Build VLANs and trunks, then verify membership before connecting the redundant third switch link. Configure the identical MSTP region on all switches and confirm root/blocked states before closing the triangle.
-4. Configure router subinterfaces and client DHCP. Verify each gateway locally. For the later phase, configure the router transit and OSPF advertisements before NAT and ACLs. Supply a new local wireless credential if enabling VyOS Wi-Fi; none is provided here.
+4. For the **later OSPF phase**, start from reset/isolated devices rather than loading historical MSTP configs. Load [later Cisco](configs/ospf-cisco-switch-1.cfg) and [Aruba](configs/ospf-aruba-switch-2.cfg) assignments, then router trunks and transit. Install dnsmasq on a Linux VM at `10.2.12.53` using [lab-dnsmasq.conf](configs/lab-dnsmasq.conf); verify `lab.test` before enabling [DHCP pools](configs/ospf-dhcp-router-1.cfg). Configure OSPF, then NAT and ACLs. Supply a new local wireless credential if enabling Wi-Fi; none is provided here.
 5. Add NAT and policy one layer at a time. Run the [validation checks](validation/README.md) after each layer and preserve a copy of the known-good configuration. For rollback, disconnect the redundant link if a loop appears, remove the most recent ACL from the interface if management is lost, or restore the saved device config from console access.
 
 ## Project Completion

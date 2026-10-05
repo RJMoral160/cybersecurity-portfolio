@@ -14,8 +14,8 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  Client["Public test client"] -->|"P-WAN-01 TCP 80<br/>P-WAN-02 TCP 21"| PF["pfSense VIP .6"]
-  PF -->|"P-NAT-01"| PS["DMZ A service .10"]
+  Client["Public test client .10"] -->|"VIP .6 TCP 80/21<br/>W10/W20 after DNAT"| PF["pfSense WAN .5<br/>VIP .6"]
+  PF -->|"N2 to .3.10"| PS["DMZ A service<br/>192.168.3.10"]
   Client -->|"VyOS rule 40 TCP 21,80<br/>rule 50 UDP 69"| VY["VyOS eth2"]
   VY -->|"routed eth1"| VS["DMZ B service .10"]
 ```

@@ -4,10 +4,12 @@
   "product": "Apache HTTP Server",
   "affected_versions": ["2.4.49"],
   "fixed_version": "2.4.50",
+  "related_advisory": "CVE-2021-42013",
+  "related_advisory_addressed_in": "2.4.51",
   "source_url": "https://httpd.apache.org/security/vulnerabilities_24.html",
   "required_conditions": {
     "alias_like_mapping_present": true,
     "default_require_all_denied_protects_target": false
   },
-  "notes": "Public advisory profile transcribed for an offline synthetic demonstration. It does not describe a local target. CGI enablement changes potential impact and must be assessed separately."
+  "notes": "Historical context: CVE-2021-41773 affected 2.4.49 and its original fix was 2.4.50. That fix was incomplete; the related CVE-2021-42013 affected 2.4.50 and was addressed in 2.4.51. Neither historical version is a current deployment recommendation. Use a currently supported release after reviewing current Apache advisories. CGI enablement changes potential impact. No local target was tested."
 }

@@ -1,5 +1,7 @@
 # Repository notes
 
+The ignored key patterns include DKIM/BIND `*.private`, SSH private-key filenames, PKCS/Java key stores, and common private-key names. File extensions alone do not identify every secret: inspect staged content with the repository checks and `git diff --cached` before committing.
+
 `.gitignore` tells Git which **untracked** local files to leave out of ordinary `git add` operations. The ignore file itself is committed so each clone starts with the same guardrails.
 
 The first group excludes operating-system and editor debris. The Python group excludes caches, virtual environments, and build products while leaving `.py` source, tests, JSON fixtures, and published Markdown reports trackable. The local-settings group excludes environment files and common credential/key formats. The temporary-output group excludes logs, packet captures, and scratch output. The final group excludes raw reports, transcripts, résumés, and local source-evidence directories.

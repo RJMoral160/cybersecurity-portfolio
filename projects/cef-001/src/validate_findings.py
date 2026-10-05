@@ -31,7 +31,7 @@ def validate(record: dict[str, Any]) -> list[str]:
     if record.get("synthetic") is not True:
         errors.append("synthetic must be true during the startup phase")
     status = record.get("status")
-    if status not in REQUIRED_BY_STATUS:
+    if not isinstance(status, str) or status not in REQUIRED_BY_STATUS:
         return errors + ["status must be one of: {}".format(", ".join(REQUIRED_BY_STATUS))]
     stages = list(REQUIRED_BY_STATUS)
     for stage in stages[: stages.index(status) + 1]:
@@ -58,7 +58,7 @@ def main() -> int:
         print("\n".join("- " + error for error in errors))
         return 1
     print("ACCEPTED: structural evidence gate passed for {}".format(record["status"]))
-    print("This does not confirm a live vulnerability or remediation outcome.")
+    print("This checks supplied fields, not historical transitions or an actual remediation outcome.")
     return 0
 
 

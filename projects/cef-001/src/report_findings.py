@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import html
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -21,7 +22,7 @@ def load_collection(path: Path) -> list[dict[str, Any]]:
     try:
         with path.open(encoding="utf-8") as handle:
             data = json.load(handle)
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise ValueError("could not read JSON collection: {}".format(exc)) from exc
     if not isinstance(data, list):
         raise ValueError("collection must be a JSON array")
@@ -51,7 +52,11 @@ def validate_collection(records: list[dict[str, Any]]) -> list[str]:
 
 def _cell(value: object) -> str:
     """Keep untrusted JSON strings inside one Markdown table cell."""
-    return str(value).replace("|", "\\|").replace("\n", " ").strip()
+    cleaned = str(value).replace("\r", " ").replace("\n", " ").strip()
+    escaped = html.escape(cleaned, quote=True)
+    for character, entity in (("\\", "&#92;"), ("|", "&#124;"), ("`", "&#96;"), ("*", "&#42;"), ("_", "&#95;"), ("[", "&#91;"), ("]", "&#93;"), ("!", "&#33;")):
+        escaped = escaped.replace(character, entity)
+    return escaped
 
 
 def render_markdown(records: list[dict[str, Any]], source_name: str) -> str:
@@ -60,7 +65,7 @@ def render_markdown(records: list[dict[str, Any]], source_name: str) -> str:
     lines = [
         "# Synthetic Finding Evidence Report",
         "",
-        "- **Source:** `{}`".format(_cell(source_name)),
+        "- **Source:** {}".format(_cell(source_name)),
         "- **Records:** {}".format(len(records)),
         "- **Scope:** Offline synthetic-data validation only.",
         "- **Limitation:** A structural pass does not confirm a live vulnerability, remediation, or retest outcome.",
@@ -99,8 +104,11 @@ def main() -> int:
         return 1
     report = render_markdown(records, args.collection.name)
     if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(report, encoding="utf-8")
+        try:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(report, encoding="utf-8")
+        except OSError as exc:
+            parser.error("could not write report: {}".format(exc))
         print("WROTE: {}".format(args.output))
     else:
         print(report)

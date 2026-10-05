@@ -22,14 +22,16 @@ The [interface and route plan](configs/INTERFACES_AND_ZONES.md) shows pfSense WA
 | pfSense | WAN VIP, service filtering, private outbound NAT | [rule and NAT tables](configs/PFSENSE_RULES.md) |
 | VyOS | Default-drop forwarding, state rules, DMZ service allows, source NAT | [command excerpt](configs/vyos-firewall.conf) |
 | Apache | HTTP endpoint in each DMZ | [reference vhost](configs/apache-vhost.conf) |
-| vsftpd | FTP endpoint and passive-range adaptation | [reference configuration](configs/vsftpd.conf) |
+| vsftpd | FTP endpoint and passive-range adaptation | [pfSense server](configs/vsftpd-pfsense.conf), [VyOS server](configs/vsftpd.conf) |
 | TFTP | VyOS-side transfer service | [service-port notes](configs/SERVICE_PORTS.md) |
 
 ## Configuration
 
+Use [service setup](configs/SERVICE_SETUP.md) for local accounts, host firewall, SELinux checks, and harmless HTTP/FTP/TFTP transfers. The [pfSense table](configs/PFSENSE_RULES.md) defines precise aliases, translated destinations, ordered ingress rules, and return paths. The [VyOS reference](configs/vyos-firewall.conf) distinguishes forwarded traffic from router-local input and IPv6 default-drop. These are new reference controls where the source report did not preserve a complete final export.
+
 Build and verify interface routes before NAT or firewall policy. On VyOS, rule 10 accepts established/related packets, rule 20 drops invalid packets, rule 30 permits selected private-to-DMZ services, and rules 40/50 permit HTTP/FTP/TFTP toward the DMZ host from the isolated public interface. All other new forward traffic follows the default drop. Source NAT rule 100 masquerades Private B through `eth2`.
 
-On pfSense, the example WAN VIP is `203.0.113.6`; a 1:1 mapping targets the example DMZ host `192.168.3.10`, while WAN filter rules allow only the required service ports. The source report's NAT procedure and architecture disagree about the internal target. The [reference table](configs/PFSENSE_RULES.md) follows the stated DMZ-service architecture and explicitly identifies the discrepancy. The original report did not preserve a passive FTP range; [the proposed range](configs/vsftpd.conf) is for a fresh lab and must be matched by policy.
+On pfSense, the example WAN VIP is `203.0.113.6`; a 1:1 mapping targets the example DMZ host `192.168.3.10`, while WAN filter rules allow only the required service ports. The source report's NAT procedure and architecture disagree about the internal target. The [reference table](configs/PFSENSE_RULES.md) follows the stated DMZ-service architecture and explicitly identifies the discrepancy. The report text did not preserve passive FTP ranges; the owner-supplied `50000–50100` (pfSense) and `30000–30100` (VyOS) values are reference settings, not recovered original configuration.
 
 ## Traffic or Data Flow
 
@@ -45,15 +47,15 @@ The [recorded troubleshooting](troubleshooting/README.md) covers a missing virtu
 
 ## Reproduction Guide
 
-1. Create two isolated three-interface firewall VMs, two AlmaLinux DMZ servers, private Windows test systems, and a public-side test client. Do not bridge the example public segment to the Internet.
+1. Create two isolated three-interface firewall VMs (pfSense CE with current Netgate documentation; VyOS 1.5 reference syntax), two AlmaLinux DMZ servers, private Windows test systems, and a public-side test client. Record actual software releases before applying any excerpt. Do not bridge the example public segment to the Internet.
 2. Assign [interface and gateway addresses](configs/INTERFACES_AND_ZONES.md). Verify each host's local gateway, then check firewall route tables. For VyOS routed-DMZ testing, add the lab-only upstream route shown in the plan.
-3. Install Apache/vsftpd; configure TFTP only on the VyOS DMZ host. Confirm local service operation before publishing through a firewall. Keep endpoint firewalls enabled and add narrow rules for required tests.
+3. Follow [service setup](configs/SERVICE_SETUP.md) for package installation, account/file preparation, Apache/vsftpd, TFTP only on the VyOS DMZ host, and host firewall/SELinux checks. Confirm local service operation before publishing through a firewall.
 4. On VyOS, apply default drop and state rules first, then service allowances and source NAT. On pfSense, add the VIP, one consistent NAT model, and matching WAN/LAN interface rules. Preserve a copy of the known-good firewall configuration.
 5. Run [allowed and blocked flow tests](validation/README.md). Watch rule counters, state tables, and host logs at each hop. If management is lost, use console access to disable the most recent rule or restore the saved configuration; do not open broad temporary WAN rules.
 
 ## Project Completion
 
-The report records completed pfSense/VyOS segmentation, Apache/FTP service access, private outbound access, and a blocked SSH attempt after drop logging was enabled. The public VyOS file is a corrected reference implementation based on recorded rule numbers; pfSense tables reconstruct the intended service mapping because the source record conflicts. No full original pfSense export, passive FTP range, end-to-end passive transfer, complete TFTP transfer, or exhaustive deny matrix is preserved. A fresh lab can add those tests and compare firewall logs to server logs.
+The report records pfSense/VyOS segmentation, Apache/FTP service access, private outbound access, and a blocked SSH attempt after drop logging was enabled. The public VyOS file is a corrected reference implementation based on recorded rule numbers; pfSense tables reconstruct the intended service mapping because the source record conflicts. No full original pfSense export, historically confirmed passive FTP range, end-to-end passive transfer trace, complete TFTP transfer trace, or exhaustive deny matrix is preserved. A fresh lab can run the new tests and compare firewall logs to server logs.
 
 ## Limitations
 
