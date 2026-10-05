@@ -1,0 +1,58 @@
+[
+  {
+    "synthetic": true,
+    "finding_id": "SYN-001-DISCOVERY",
+    "status": "discovered",
+    "observation": "Synthetic service observation retained for local validator testing."
+  },
+  {
+    "synthetic": true,
+    "finding_id": "SYN-002-CORRELATION",
+    "status": "correlated",
+    "observation": "Synthetic service observation retained for local validator testing.",
+    "correlation": "CVE-20XX-0000 is a possible correlation, not a confirmed vulnerability."
+  },
+  {
+    "synthetic": true,
+    "finding_id": "SYN-003-APPLICABILITY",
+    "status": "applicable",
+    "observation": "Synthetic service observation retained for local validator testing.",
+    "correlation": "CVE-20XX-0000 is a possible correlation.",
+    "authoritative_source": "https://example.invalid/advisory",
+    "product_identity": "Example Product 1.0",
+    "affected_range_evidence": "Synthetic advisory range evidence for test purposes.",
+    "prerequisite_evidence": "Synthetic configuration prerequisite for test purposes.",
+    "human_approval": "approved-for-synthetic-test"
+  },
+  {
+    "synthetic": true,
+    "finding_id": "SYN-004-REMEDIATION",
+    "status": "remediated",
+    "observation": "Synthetic service observation retained for local validator testing.",
+    "correlation": "CVE-20XX-0000 is a possible correlation.",
+    "authoritative_source": "https://example.invalid/advisory",
+    "product_identity": "Example Product 1.0",
+    "affected_range_evidence": "Synthetic advisory range evidence for test purposes.",
+    "prerequisite_evidence": "Synthetic configuration prerequisite for test purposes.",
+    "human_approval": "approved-for-synthetic-test",
+    "remediation": "Synthetic package update procedure.",
+    "remediation_validation": "Synthetic configuration validation result."
+  },
+  {
+    "synthetic": true,
+    "finding_id": "SYN-005-RETEST",
+    "status": "retested",
+    "observation": "Synthetic service observation retained for local validator testing.",
+    "correlation": "CVE-20XX-0000 is a possible correlation.",
+    "authoritative_source": "https://example.invalid/advisory",
+    "product_identity": "Example Product 1.0",
+    "affected_range_evidence": "Synthetic advisory range evidence for test purposes.",
+    "prerequisite_evidence": "Synthetic configuration prerequisite for test purposes.",
+    "human_approval": "approved-for-synthetic-test",
+    "remediation": "Synthetic package update procedure.",
+    "remediation_validation": "Synthetic configuration validation result.",
+    "retest_method": "Repeat the same synthetic evidence check.",
+    "baseline_reference": "SYN-001-DISCOVERY",
+    "retest_result": "Synthetic retest result recorded for validator testing."
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "synthetic": true,
+  "product": "Apache HTTP Server",
+  "version": "2.4.49",
+  "conditions": {
+    "alias_like_mapping_present": true,
+    "default_require_all_denied_protects_target": false,
+    "cgi_enabled_for_aliased_path": false
+  },
+  "observation_note": "Invented local fixture for code testing. It is not service discovery or evidence about a real host."
+}

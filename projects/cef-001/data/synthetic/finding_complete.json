@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "finding_id": "SYN-001",
+  "status": "applicable",
+  "observation": "Synthetic service observation for validator testing.",
+  "correlation": "CVE-20XX-0000 is a possible correlation in this synthetic fixture.",
+  "authoritative_source": "https://example.invalid/advisory",
+  "product_identity": "Example Product 1.0",
+  "affected_range_evidence": "Synthetic advisory range evidence recorded for test purposes.",
+  "prerequisite_evidence": "Synthetic configuration prerequisite is documented for test purposes.",
+  "human_approval": "approved-for-synthetic-test"
+}

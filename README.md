@@ -1,21 +1,31 @@
-# Cybersecurity portfolio
+# Cybersecurity Portfolio
 
-I am a Purdue cybersecurity student pursuing network security, infrastructure security, and security operations roles. This portfolio explains selected technical work from controlled team laboratories. I served as the primary technical contributor and informal technical lead for the routing/switching and enterprise email/DNS work, guiding configuration, integration, validation, and troubleshooting. The firewall/DMZ study uses narrower team attribution because the available record does not establish my individual share of each task.
+Technical project records for routed networks, enterprise mail and DNS, DMZ firewalls, and a local vulnerability-evidence pipeline. Each project keeps its architecture, configuration excerpts, validation steps, and troubleshooting near the implementation.
 
-## Start with these three projects
+## Projects
 
-1. [Routed and Switched Enterprise Network](case-studies/routed-switched-network/README.md) — Cisco, Aruba, and VyOS VLANs; MSTP redundancy; OSPF, NAT, and ACL tests. Includes the diagnosis of wrong root election, a switching loop, missing route coverage, and an edge NAT error.
-2. [Enterprise Email and DNS Security](case-studies/enterprise-email-dns-security/README.md) — BIND and Microsoft DNS, Postfix/Exchange mail flow, SpamAssassin, DNSSEC, and SPF/DKIM/DMARC configuration. The case distinguishes recorded configuration from incomplete end-to-end mail validation.
-3. [Firewall and DMZ Service Security](case-studies/firewall-dmz-security/README.md) — pfSense and VyOS segmentation, controlled HTTP/FTP/TFTP access, NAT, and blocked-SSH logging in a team lab.
+| Project | Objective | Major technologies | Implementation artifacts | Status |
+|---|---|---|---|---|
+| [Routed and switched network](projects/routed-switched-network/README.md) | Segment client networks, control redundant paths, and route traffic through an edge | Cisco IOS, ArubaOS-S, VyOS, VLANs, MSTP, OSPF, NAT | [device configurations](projects/routed-switched-network/configs/), [validation](projects/routed-switched-network/validation/README.md), [diagrams](projects/routed-switched-network/diagrams/README.md) | Reconstructed and documented |
+| [Enterprise email and DNS](projects/enterprise-email-dns-security/README.md) | Integrate internal/external DNS and a filtered mail relay | BIND, Microsoft DNS, Postfix, Exchange, SpamAssassin, DNSSEC, OpenDKIM | [zone/configuration files](projects/enterprise-email-dns-security/configs/), [validation](projects/enterprise-email-dns-security/validation/README.md), [diagrams](projects/enterprise-email-dns-security/diagrams/README.md) | Reconstructed and documented |
+| [Firewall and DMZ security](projects/firewall-dmz-security/README.md) | Isolate public services from private networks and validate allowed/blocked paths | pfSense, VyOS, Apache, vsftpd, TFTP, NAT | [rules and service configs](projects/firewall-dmz-security/configs/), [flow tests](projects/firewall-dmz-security/validation/README.md), [diagrams](projects/firewall-dmz-security/diagrams/README.md) | Reconstructed and documented |
+| [Vulnerability evidence pipeline](projects/cef-001/README.md) | Separate discovery, advisory correlation, applicability, remediation, and retest records | Python 3, JSON, unittest | [source](projects/cef-001/src/), [tests](projects/cef-001/tests/), [synthetic data](projects/cef-001/data/synthetic/), [sample output](projects/cef-001/examples/sample_report.md) | Active |
 
-| Skill area | Evidence you can inspect |
-|---|---|
-| Network integration | VLAN/trunk and routed path decisions, MSTP root placement, OSPF/NAT/ACL failures and corrections |
-| Enterprise services | DNS namespace design, mail relay dependencies, authentication record configuration, service troubleshooting |
-| Firewall validation | Allowed/denied flow matrix, DMZ placement, NAT behavior, host-versus-firewall diagnosis |
+## Project Architecture
 
-See the [capability matrix](skills-evidence/CAPABILITY_MATRIX.md) and [coursework map](skills-evidence/COURSEWORK_MAP.md) for the claim boundaries and related work.
+The network project supplies VLAN, routing, and edge-policy examples. The email/DNS project builds services across internal and outer namespaces. The firewall project documents separate public, DMZ, and private zones. The Python project is an independent offline workflow for structured vulnerability records.
 
-An [active Python evidence-pipeline project](case-studies/cef-001/README.md) is also documented with its synthetic-data and AI-assistance limits.
+## Implementations
 
-Private source evidence includes the original reports, screenshots, configurations, résumé, and transcript. They are not published here. Public diagrams use safe example addresses and are labeled as reconstructions. [AI assistance](AI_ASSISTANCE.md) was used to organize evidence and prepare this sanitized portfolio; the laboratory work and the statements about my contribution came before this documentation process.
+- Network: [Cisco/Aruba/VyOS configuration set](projects/routed-switched-network/configs/), [port and subnet plan](projects/routed-switched-network/configs/PORT_AND_SUBNET_PLAN.md), [validation commands](projects/routed-switched-network/validation/README.md), [troubleshooting](projects/routed-switched-network/troubleshooting/README.md), [reproduction](projects/routed-switched-network/README.md#reproduction-guide).
+- Email/DNS: [BIND zone](projects/enterprise-email-dns-security/configs/example.org.zone), [Postfix relay](projects/enterprise-email-dns-security/configs/postfix-main.cf), [mail/DNS checks](projects/enterprise-email-dns-security/validation/README.md), [troubleshooting](projects/enterprise-email-dns-security/troubleshooting/README.md), [reproduction](projects/enterprise-email-dns-security/README.md#reproduction-guide).
+- Firewall/DMZ: [VyOS policy](projects/firewall-dmz-security/configs/vyos-firewall.conf), [pfSense rule/NAT tables](projects/firewall-dmz-security/configs/PFSENSE_RULES.md), [flow validation](projects/firewall-dmz-security/validation/README.md), [troubleshooting](projects/firewall-dmz-security/troubleshooting/README.md), [reproduction](projects/firewall-dmz-security/README.md#reproduction-guide).
+- Python pipeline: [source and tests](projects/cef-001/README.md#repository-contents), [run instructions](projects/cef-001/README.md#reproduction-guide), [sample report](projects/cef-001/examples/sample_report.md).
+
+## Project Status
+
+The network, email/DNS, and firewall implementations were completed in controlled team laboratories and are reconstructed here from project records. The public configuration sets are edited excerpts or reference implementations as labeled in [Artifact Guide](ARTIFACT_GUIDE.md). The Python pipeline runs locally with synthetic inputs and remains active. No additional project is planned in this repository at present.
+
+## Repository Structure
+
+`projects/<name>/configs/` holds device and service settings; `diagrams/` holds traffic and architecture views; `validation/` holds checks and expected behavior; `troubleshooting/` records faults and corrections. The Python project also has `src/`, `tests/`, `data/`, and `examples/`. [PROJECT_INDEX.md](PROJECT_INDEX.md) links technologies to specific files and tests. [REPOSITORY_NOTES.md](REPOSITORY_NOTES.md) explains the committed ignore rules.

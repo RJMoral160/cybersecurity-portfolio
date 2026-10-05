@@ -1,12 +1,53 @@
+# Operating systems and editors
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python and local build state; source, tests, and synthetic JSON remain trackable
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+build/
+dist/
+
+# Local settings, credentials, certificates, and private keys
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 *.p12
 *.pfx
-*.docx
-*.pdf
+*.kdbx
+credentials.json
+service-account*.json
+*.token
+
+# Local logs, captures, and temporary output
+*.log
+*.tmp
+*.temp
 *.pcap
 *.pcapng
-__pycache__/
+tmp/
+temp/
+local-output/
+
+# Source reports and personal/academic documents
+*.docx
+*.pdf
+coursework/
+source-reports/
+transcripts/
+resumes/
+private/
+local-evidence/

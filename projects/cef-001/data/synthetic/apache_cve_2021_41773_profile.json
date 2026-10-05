@@ -1,0 +1,13 @@
+{
+  "cve": "CVE-2021-41773",
+  "vendor": "Apache Software Foundation",
+  "product": "Apache HTTP Server",
+  "affected_versions": ["2.4.49"],
+  "fixed_version": "2.4.50",
+  "source_url": "https://httpd.apache.org/security/vulnerabilities_24.html",
+  "required_conditions": {
+    "alias_like_mapping_present": true,
+    "default_require_all_denied_protects_target": false
+  },
+  "notes": "Public advisory profile transcribed for an offline synthetic demonstration. It does not describe a local target. CGI enablement changes potential impact and must be assessed separately."
+}

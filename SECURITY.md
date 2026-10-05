@@ -1,5 +1,5 @@
-# Publication and safe-use policy
+# Safe use
 
-This repository contains sanitized case studies and reconstructed diagrams only. It does not contain target systems, live credentials, raw course reports, internal network maps, or executable attack material. Addresses in diagrams are RFC 1918 private examples or RFC 5737 documentation addresses; `example.org` is an example domain.
+The network and service configurations are lab excerpts or labeled reference implementations. Use them only on systems you own or are authorized to configure. Review device syntax, interface assignments, certificate/key paths, and default policies before applying a file. RFC 5737 addresses in the examples are documentation placeholders.
 
-The work described was performed in controlled team laboratories. It is not authorization to test a third-party system. If you find a sensitive item in this repository, open a private security report through GitHub rather than posting the value in a public issue.
+Keep credentials, private keys, full device exports, packet captures, and raw source reports out of this repository. If a sensitive value appears in a commit, report it privately through GitHub's security-reporting channel so the value can be revoked and repository history reviewed.

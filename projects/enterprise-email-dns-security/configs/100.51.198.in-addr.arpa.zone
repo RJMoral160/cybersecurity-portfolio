@@ -1,0 +1,11 @@
+; artifact: reconstructed-from-project-records
+; Reverse zone for the RFC 5737 example network.
+$TTL 300
+@       IN SOA ns1.example.org. hostmaster.example.org. (
+            2026100501 3600 900 604800 300 )
+        IN NS ns1.example.org.
+        IN NS ns2.example.org.
+10      IN PTR ns1.example.org.
+11      IN PTR ns2.example.org.
+12      IN PTR mail.example.org.
+13      IN PTR owa.example.org.

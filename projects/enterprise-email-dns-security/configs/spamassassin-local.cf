@@ -1,0 +1,4 @@
+# artifact: original-sanitized
+required_score 5
+report_safe 0
+rewrite_header Subject [SPAM]
