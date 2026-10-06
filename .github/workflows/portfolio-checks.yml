@@ -23,6 +23,8 @@ jobs:
       - name: Static repository checks
         run: python tools/check_repo.py
       - name: Render Mermaid blocks
+        # GitHub runner Chrome lacks a usable sandbox. Run the no-sandbox
+        # renderer only on trusted main pushes; PRs still run static checks.
+        if: github.event_name == 'push'
         run: |
-          npm install --prefix "$RUNNER_TEMP/portfolio-mmdc" @mermaid-js/mermaid-cli@11.4.2 puppeteer@23.1.1
-          python tools/check_repo.py --render --mmdc "$RUNNER_TEMP/portfolio-mmdc/node_modules/.bin/mmdc"
+          npm install --

@@ -66,7 +66,7 @@ def check_links(path, body):
     return failures
 
 
-def check_diagrams(path, body, render, tempdir, mmdc):
+def check_diagrams(path, body, render, tempdir, mmdc, puppeteer_config):
     failures = []
     openings = body.count("```mermaid")
     blocks = MERMAID_BLOCK.findall(body)
@@ -79,7 +79,10 @@ def check_diagrams(path, body, render, tempdir, mmdc):
             source = tempdir / (path.stem + "-" + str(index) + "-" + str(abs(hash(str(path)))) + ".mmd")
             output = source.with_suffix(".svg")
             source.write_text(diagram, encoding="utf-8")
-            result = subprocess.run([mmdc, "-i", str(source), "-o", str(output)], capture_output=True, text=True)
+            command = [mmdc, "-i", str(source), "-o", str(output)]
+            if puppeteer_config:
+                command.extend(["-p", str(puppeteer_config)])
+            result = subprocess.run(command, capture_output=True, text=True)
             if result.returncode or not output.is_file():
                 failures.append("{}: Mermaid render failed block {}: {}".format(path.relative_to(ROOT), index, result.stderr[:1000]))
     return failures, len(blocks)
@@ -89,6 +92,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--render", action="store_true", help="render all Mermaid blocks using installed mmdc")
     parser.add_argument("--mmdc", default="mmdc", help="path to Mermaid CLI, used with --render")
+    parser.add_argument("--puppeteer-config", type=Path, help="Mermaid CLI browser configuration for --render")
     args = parser.parse_args()
     if args.render and not shutil.which(args.mmdc):
         parser.error("--render requires Mermaid CLI (mmdc)")
@@ -117,7 +121,7 @@ def main():
                     failures.append("{}: forbidden secret/address pattern".format(relative))
             if path.suffix == ".md":
                 failures.extend(check_links(path, body))
-                diagram_errors, count = check_diagrams(path, body, args.render, Path(temporary), args.mmdc)
+                diagram_errors, count = check_diagrams(path, body, args.render, Path(temporary), args.mmdc, args.puppeteer_config)
                 failures.extend(diagram_errors)
                 diagram_count += count
             for match in ADDRESS.finditer(body):
