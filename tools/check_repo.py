@@ -81,7 +81,7 @@ def check_diagrams(path, body, render, tempdir, mmdc):
             source.write_text(diagram, encoding="utf-8")
             result = subprocess.run([mmdc, "-i", str(source), "-o", str(output)], capture_output=True, text=True)
             if result.returncode or not output.is_file():
-                failures.append("{}: Mermaid render failed block {}: {}".format(path.relative_to(ROOT), index, result.stderr[-400:]))
+                failures.append("{}: Mermaid render failed block {}: {}".format(path.relative_to(ROOT), index, result.stderr[:1000]))
     return failures, len(blocks)
 
 
