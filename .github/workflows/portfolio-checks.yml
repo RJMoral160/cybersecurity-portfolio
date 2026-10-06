@@ -27,4 +27,5 @@ jobs:
         # renderer only on trusted main pushes; PRs still run static checks.
         if: github.event_name == 'push'
         run: |
-          npm install --
+          npm install --prefix "$RUNNER_TEMP/portfolio-mmdc" @mermaid-js/mermaid-cli@11.4.2 puppeteer@23.1.1
+          python tools/check_repo.py --render --mmdc "$RUNNER_TEMP/portfolio-mmdc/node_modules/.bin/mmdc" --puppeteer-config .github/mermaid-puppeteer.json
